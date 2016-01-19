@@ -36,28 +36,6 @@ describe('Reissue module', function() {
     });
 
 
-    it('should emulate setInterval and kick off immediately', function(done) {
-
-        var out = [];
-        var i = 0;
-
-        reissue.create({
-            func: function(callback) {
-                out.push(i);
-                i += 1;
-                // if we reached 5, stop the test
-                if (i === 5) {
-                    assert.deepEqual(out, [0,1,2,3,4]);
-                    return done();
-                }
-                return callback();
-            },
-            interval: 100,
-            immediate: true
-        });
-    });
-
-
     it('should accept arguments', function(done) {
 
         var out = [];
@@ -138,7 +116,7 @@ describe('Reissue module', function() {
                 i++;
 
                 // this ensures we're never called a 6th time
-                assert.equal(i <= 5, true);
+                assert.isBelow(i, 6);
                 // if we reached 5, stop the test
                 if (i === 5) {
                     timer.stop();
@@ -276,4 +254,32 @@ describe('Reissue module', function() {
     });
 
 
+    it('should start after arbitrary delay', function(done) {
+
+        var startTime = Date.now();
+        var out = [];
+        var i = 0;
+
+        var timer = reissue.create({
+            func: function(callback) {
+
+                out.push(i);
+                i += 1;
+
+                // ensure elapsed time for first invocation is at least 150ms
+                // due to delay.
+                if (i === 1) {
+                    assert.equal((Date.now() - startTime) >= 150, true);
+                }
+                // if we reached 5, stop the test
+                if (i === 5) {
+                    assert.deepEqual(out, [0,1,2,3,4]);
+                    return done();
+                }
+                return callback();
+            },
+            interval: 100
+        });
+        timer.start(150);
+    });
 });
