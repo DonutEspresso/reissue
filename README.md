@@ -2,7 +2,7 @@
 
 [![NPM Version](https://img.shields.io/npm/v/reissue.svg)](https://npmjs.org/package/reissue)
 [![Build Status](https://travis-ci.org/DonutEspresso/reissue.svg?branch=master)](https://travis-ci.org/DonutEspresso/reissue)
-[![Coverage Status](https://coveralls.io/repos/DonutEspresso/reissue/badge.svg?branch=master)](https://coveralls.io/r/DonutEspresso/reissue?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/DonutEspresso/reissue/badge.svg?branch=master)](https://coveralls.io/github/DonutEspresso/reissue?branch=master)
 [![Dependency Status](https://david-dm.org/DonutEspresso/reissue.svg)](https://david-dm.org/DonutEspresso/reissue)
 [![devDependency Status](https://david-dm.org/DonutEspresso/reissue/dev-status.svg)](https://david-dm.org/DonutEspresso/reissue#info=devDependencies)
 [![bitHound Score](https://www.bithound.io/github/DonutEspresso/reissue/badges/score.svg)](https://www.bithound.io/github/DonutEspresso/reissue/master)
