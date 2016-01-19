@@ -66,18 +66,19 @@ this in lieu of native `bind()` if you are concerned about performance. reissue
 uses `apply()` under the hood to do context/arg binding.
 * `[opts.args]` {Array} an optional array of arguments for the function. used in
 conjunction with the same `apply()` call as the context.
-* `[opts.immediate]` {Boolean} when true, creation of the reissue object begins
-the interval immediately.
 
 __Returns__: {Object} returns a handler object
 
 
 The returned handler object exposes the following methods:
 
-### handler.start()
+### handler.start(delay)
 
-Starts the timer interval. Takes no parameters. Calling `start()` while reissue
-is already active will throw an exception.
+Starts the timer interval. Calling `start()` while reissue is already active
+will throw an exception.
+
+* `delay` {Number} an optional delay in ms before first invocation. if no delay
+is provided, first invocation is synchronous (no setImmediate, no setTimeout).
 
 __Returns__: {undefined} returns nothing
 
