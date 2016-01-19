@@ -89,6 +89,14 @@ invocations of the function, even if they have already been scheduled.
 __Returns__: {undefined} returns nothing
 
 
+The handler object also emits the following events:
+
+### handler.on('error', function(err) {...}
+
+If your function returns an error to the callback, this event will be emitted.
+The subscribed function will receive an error as it's only parameter.
+
+
 ## Contributing
 
 Add unit tests for any new or changed functionality. Ensure that lint and style
