@@ -1,5 +1,5 @@
 {
-  "name": "vinea",
+  "name": "reissue",
   "version": "1.0.0",
   "main": "lib/index.js",
   "description": "setInterval with setTimeout semantics",
