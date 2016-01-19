@@ -1,0 +1,44 @@
+{
+  "name": "vinea",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "description": "setInterval with setTimeout semantics",
+  "homepage": "https://github.com/DonutEspresso/reissue",
+  "author": {
+    "name": "Alex Liu",
+    "email": "donutespresso@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DonutEspresso/reissue"
+  },
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "setTimeout",
+    "setInterval",
+    "timer",
+    "repeat",
+    "repeatEvery"
+  ],
+  "scripts": {
+    "test": "make test",
+    "githooks": "make githooks",
+    "build": "make",
+    "prepush": "make prepush"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "coveralls": "^2.11.6",
+    "eslint": "^1.10.3",
+    "istanbul": "^0.4.2",
+    "jscs": "^2.8.0",
+    "mocha": "^2.3.4",
+    "nsp": "^2.2.0"
+  },
+  "dependencies": {
+    "assert-plus": "^0.2.0"
+  }
+}
