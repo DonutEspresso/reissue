@@ -282,4 +282,22 @@ describe('Reissue module', function() {
         });
         timer.start(150);
     });
+
+    it('should start asynchronously after explicit 0 delay', function(done) {
+
+        var async = false;
+
+        var timer = reissue.create({
+            func: function(callback) {
+
+                // if async === false, this was called synchronously
+                assert.equal(async, true);
+                callback();
+                return done();
+            },
+            interval: 100
+        });
+        timer.start(0);
+        async = true;
+    });
 });
