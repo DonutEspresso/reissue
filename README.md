@@ -103,7 +103,8 @@ The subscribed function will receive an error as it's only parameter.
 Add unit tests for any new or changed functionality. Ensure that lint and style
 checks pass.
 
-To start contributing, install the git preush hooks:
+To start contributing, install the git prep
+ush hooks:
 
 ```sh
 make githooks
