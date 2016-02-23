@@ -39,6 +39,6 @@
     "nsp": "^2.2.0"
   },
   "dependencies": {
-    "assert-plus": "^0.2.0"
+    "assert-plus": "^1.0.0"
   }
 }

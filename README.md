@@ -79,6 +79,7 @@ will throw an exception.
 
 * `delay` {Number} an optional delay in ms before first invocation. if no delay
 is provided, first invocation is synchronous (no setImmediate, no setTimeout).
+Note that `0` is explicitly a valid value, and will be passed to setTimeout.
 
 __Returns__: {undefined} returns nothing
 
@@ -103,8 +104,7 @@ The subscribed function will receive an error as it's only parameter.
 Add unit tests for any new or changed functionality. Ensure that lint and style
 checks pass.
 
-To start contributing, install the git prep
-ush hooks:
+To start contributing, install the git prepush hooks:
 
 ```sh
 make githooks
