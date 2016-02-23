@@ -194,6 +194,7 @@ describe('Reissue module', function() {
     it('should emit error', function(done) {
 
         var i = 0;
+        var errFired = false;
 
         var timer = reissue.create({
             func: function(callback) {
@@ -205,6 +206,7 @@ describe('Reissue module', function() {
                 }
 
                 if (i === 5) {
+                    assert.isTrue(errFired);
                     return done();
                 }
 
@@ -214,14 +216,69 @@ describe('Reissue module', function() {
         });
 
         timer.on('error', function(err) {
-            if (i === 2) {
-                assert.ok(err);
-                assert.equal(err instanceof Error, true);
-                assert.equal(err.msg, 'boom');
-            }
+            assert.ok(err);
+            assert.equal(err instanceof Error, true);
+            assert.equal(err.message, 'boom');
+            errFired = true;
         });
-        timer.start();
 
+        timer.start();
+    });
+
+
+    it('should emit error with context and args', function(done) {
+
+        var out = '';
+        var i = 0;
+        var fooStr = 'random string';
+        var foo = {
+            printHi: function printHi() {
+                out += 'hi';
+            }
+        };
+        var errFired = false;
+
+        var timer = reissue.create({
+            func: function(argStr, callback) {
+
+                i++;
+
+                // assert that args were injected
+                assert.equal(argStr, fooStr);
+
+                // assert correct context was bound
+                assert.equal(this === foo, true);
+
+                // invoke
+                this.printHi();
+
+                // at 2, fire an error!
+                if (i === 2) {
+                    return callback(new Error('boom'));
+                }
+
+                // if we reached 5, stop the test
+                if (i === 5) {
+                    assert.isTrue(errFired);
+                    assert.equal(out, 'hihihihihi');
+                    return done();
+                }
+
+                return callback();
+            },
+            context: foo,
+            args: [fooStr],
+            interval: 100
+        });
+
+        timer.on('error', function(err) {
+            assert.ok(err);
+            assert.equal(err instanceof Error, true);
+            assert.equal(err.message, 'boom');
+            errFired = true;
+        });
+
+        timer.start();
     });
 
 
