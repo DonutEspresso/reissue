@@ -340,6 +340,7 @@ describe('Reissue module', function() {
         timer.start(150);
     });
 
+
     it('should start asynchronously after explicit 0 delay', function(done) {
 
         var async = false;
@@ -349,12 +350,37 @@ describe('Reissue module', function() {
 
                 // if async === false, this was called synchronously
                 assert.equal(async, true);
-                callback();
                 return done();
+                // no need to call reissue's callback here, as that will just
+                // invoke this function again and call done() which will fail
+                // the test.
             },
             interval: 100
         });
         timer.start(0);
         async = true;
+    });
+
+
+    it('should not execute first invocation if stop was called',
+    function(done) {
+
+        var fired = false;
+
+        var timer = reissue.create({
+            func: function(callback) {
+                fired = true;
+                return callback();
+            },
+            interval: 300
+        });
+        timer.start(300);
+        timer.stop();
+
+        // because we called stop, reissue should never fire
+        setTimeout(function() {
+            assert.isFalse(fired);
+            return done();
+        }, 500);
     });
 });
