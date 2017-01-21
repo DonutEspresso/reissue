@@ -385,8 +385,7 @@ describe('Reissue module', function() {
     });
 
 
-    it('should call callback if stop called when already inactive',
-    function(done) {
+    it('should emit stop event if reissue is inactive', function(done) {
 
         var timer = reissue.create({
             func: function(callback) {
@@ -394,11 +393,12 @@ describe('Reissue module', function() {
             },
             interval: 100
         });
-        timer.stop(done);
+        timer.on('stop', done);
+        timer.stop();
     });
 
 
-    it('should call stop callback on completion when stop is called pre ' +
+    it('should emit stop on completion when stop() is called pre ' +
     'function invocation', function(done) {
 
         var out = [];
@@ -412,18 +412,21 @@ describe('Reissue module', function() {
             },
             interval: 100
         });
+
+        timer.on('stop', function() {
+            assert.deepEqual(out, [0,1,2]);
+            return done();
+        });
+
         timer.start();
 
         setTimeout(function() {
-            timer.stop(function() {
-                assert.deepEqual(out, [0,1,2]);
-                return done();
-            });
+            timer.stop();
         }, 300);
     });
 
 
-    it('should call stop callback on completion when stop is called mid ' +
+    it('should emit stop event on completion when stop() is called mid ' +
     'function invocation', function(done) {
 
         var count = 0;
@@ -437,12 +440,13 @@ describe('Reissue module', function() {
             interval: 1000
         });
 
+        timer.on('stop', function() {
+            assert.equal(count, 1);
+            return done();
+        });
 
         setImmediate(function() {
-            timer.stop(function() {
-                assert.equal(count, 1);
-                return done();
-            });
+            timer.stop();
         });
 
         timer.start();
