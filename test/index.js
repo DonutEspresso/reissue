@@ -103,6 +103,7 @@ describe('Reissue module', function() {
             args: [fooStr],
             interval: 100
         });
+
         timer.start();
     });
 
@@ -398,8 +399,8 @@ describe('Reissue module', function() {
     });
 
 
-    it('should emit stop on completion when stop() is called pre ' +
-    'function invocation', function(done) {
+    it('should emit stop event when stop() is called pre function invocation',
+    function(done) {
 
         var out = [];
         var i = 0;
@@ -447,6 +448,96 @@ describe('Reissue module', function() {
 
         setImmediate(function() {
             timer.stop();
+        });
+
+        timer.start();
+    });
+
+
+    it('should emit timeout event when invocation takes longer than max ' +
+    'timeout', function(done) {
+
+        var timeoutCalled = false;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('timeout', function(callback) {
+            timeoutCalled = true;
+            timer.stop();
+            return callback();
+        });
+
+        timer.on('stop', function() {
+            assert.isTrue(timeoutCalled);
+            return done();
+        });
+
+        timer.start();
+    });
+
+
+    it('should not error if no timeout listener attached', function(done) {
+
+        var funcCalled = 0;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                funcCalled += 1;
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('stop', function() {
+            assert.equal(funcCalled, 1);
+            return done();
+        });
+
+        timer.start();
+        timer.stop();
+    });
+
+
+    it('should not call interval function if timeout callback has not yet ' +
+    'been called', function(done) {
+
+
+        var timeoutCalled = 0;
+        var funcCalled = 0;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                funcCalled += 1;
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('timeout', function(callback) {
+            setTimeout(function() {
+                // don't increment flag until after multiple intervals have
+                // passed.
+                timeoutCalled += 1;
+                timer.stop();
+                return callback();
+            }, 1000);
+        });
+
+        timer.on('stop', function() {
+            assert.equal(timeoutCalled, 1);
+            assert.equal(funcCalled, 1);
+            return done();
         });
 
         timer.start();
