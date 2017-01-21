@@ -383,4 +383,78 @@ describe('Reissue module', function() {
             return done();
         }, 500);
     });
+
+
+    it('should emit stop event if reissue is inactive', function(done) {
+        var timer = reissue.create({
+             func: function(callback) {
+                 return callback();
+             },
+             interval: 100
+         });
+        timer.on('stop', done);
+        timer.stop();
+    });
+
+
+    it('should emit stop, cancelling next invocation', function(done) {
+
+        var out = [];
+        var i = 0;
+
+        var timer = reissue.create({
+            func: function(callback) {
+                out.push(i++);
+                return callback();
+            },
+            interval: 500
+        });
+
+        timer.on('stop', function() {
+            assert.deepEqual(out, [0,1]);
+            return done();
+        });
+
+        timer.start();
+
+        // this should allow two invocations, then cancel the third.
+        setTimeout(function() {
+            timer.stop();
+        }, 1000);
+    });
+
+
+    it('should emit stop, never schedules next invocation', function(done) {
+
+        var out = [];
+        var i = 0;
+
+        var timer = reissue.create({
+            func: function(callback) {
+                out.push(i++);
+
+                if (i === 1) {
+                    return setTimeout(callback, 600);
+                } else {
+                    return callback();
+                }
+            },
+            interval: 500
+        });
+
+        timer.on('stop', function() {
+            assert.deepEqual(out, [0,1]);
+            return done();
+        });
+
+        timer.start();
+
+        // this should allow two invocations, calling stop while user supplied
+        // function is still going on the second time around. once it
+        // completes, stop should get emitted and the third invocation is never
+        // scheduled.
+        setTimeout(function() {
+            timer.stop();
+        }, 1000);
+    });
 });
