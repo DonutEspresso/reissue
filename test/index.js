@@ -457,4 +457,65 @@ describe('Reissue module', function() {
             timer.stop();
         }, 1000);
     });
+
+
+    it('should stop and timeout should never fire', function(done) {
+
+        var timer = reissue.create({
+            func: function(callback) {
+                return setTimeout(callback, 500);
+            },
+            interval: 100,
+            timeout: 200
+        });
+
+        timer.on('timeout', function(callback) {
+            assert.fail('should not get here!');
+            return callback();
+        });
+
+        timer.on('stop', function() {
+            return done();
+        });
+
+        timer.start();
+        timer.stop();
+    });
+
+
+    it('should cancel next invocation via timeout callback', function(done) {
+
+        var timer = reissue.create({
+            func: function(callback) {
+                return setTimeout(callback, 500);
+            },
+            interval: 100,
+            timeout: 200
+        });
+
+        var start = Date.now();
+
+        timer.once('timeout', function(callback) {
+            timer.once('timeout', function(cb) {
+                // since we've thrown the first one away, and invoked it again
+                // immediately, we should be somewhere between 400-500ms
+                // elapsed
+                var elapsed = Date.now() - start;
+                assert.isAtLeast(elapsed, 400);
+                assert.isAtMost(elapsed, 500);
+                timer.stop();
+                return cb();
+            });
+
+            // true cancels the timed out invocation and schedules one
+            // immediately
+            return callback(true);
+        });
+
+        timer.on('stop', function() {
+            return done();
+        });
+
+        timer.start();
+    });
 });
