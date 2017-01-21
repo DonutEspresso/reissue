@@ -103,6 +103,7 @@ describe('Reissue module', function() {
             args: [fooStr],
             interval: 100
         });
+
         timer.start();
     });
 
@@ -382,5 +383,163 @@ describe('Reissue module', function() {
             assert.isFalse(fired);
             return done();
         }, 500);
+    });
+
+
+    it('should emit stop event if reissue is inactive', function(done) {
+
+        var timer = reissue.create({
+            func: function(callback) {
+                return callback();
+            },
+            interval: 100
+        });
+        timer.on('stop', done);
+        timer.stop();
+    });
+
+
+    it('should emit stop event when stop() is called pre function invocation',
+    function(done) {
+
+        var out = [];
+        var i = 0;
+
+        var timer = reissue.create({
+            func: function(callback) {
+                out.push(i);
+                i += 1;
+                return callback();
+            },
+            interval: 100
+        });
+
+        timer.on('stop', function() {
+            assert.deepEqual(out, [0,1,2]);
+            return done();
+        });
+
+        timer.start();
+
+        setTimeout(function() {
+            timer.stop();
+        }, 300);
+    });
+
+
+    it('should emit stop event on completion when stop() is called mid ' +
+    'function invocation', function(done) {
+
+        var count = 0;
+
+        // attempt run this only through one cycle
+        var timer = reissue.create({
+            func: function(callback) {
+                count++;
+                return setTimeout(callback, 1000);
+            },
+            interval: 1000
+        });
+
+        timer.on('stop', function() {
+            assert.equal(count, 1);
+            return done();
+        });
+
+        setImmediate(function() {
+            timer.stop();
+        });
+
+        timer.start();
+    });
+
+
+    it('should emit timeout event when invocation takes longer than max ' +
+    'timeout', function(done) {
+
+        var timeoutCalled = false;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('timeout', function(callback) {
+            timeoutCalled = true;
+            timer.stop();
+            return callback();
+        });
+
+        timer.on('stop', function() {
+            assert.isTrue(timeoutCalled);
+            return done();
+        });
+
+        timer.start();
+    });
+
+
+    it('should not error if no timeout listener attached', function(done) {
+
+        var funcCalled = 0;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                funcCalled += 1;
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('stop', function() {
+            assert.equal(funcCalled, 1);
+            return done();
+        });
+
+        timer.start();
+        timer.stop();
+    });
+
+
+    it('should not call interval function if timeout callback has not yet ' +
+    'been called', function(done) {
+
+
+        var timeoutCalled = 0;
+        var funcCalled = 0;
+
+        // invocation takes 400ms, and max timeout is 300ms
+        var timer = reissue.create({
+            func: function(callback) {
+                funcCalled += 1;
+                return setTimeout(callback, 400);
+            },
+            interval: 100,
+            timeout: 300
+        });
+
+        timer.on('timeout', function(callback) {
+            setTimeout(function() {
+                // don't increment flag until after multiple intervals have
+                // passed.
+                timeoutCalled += 1;
+                timer.stop();
+                return callback();
+            }, 1000);
+        });
+
+        timer.on('stop', function() {
+            assert.equal(timeoutCalled, 1);
+            assert.equal(funcCalled, 1);
+            return done();
+        });
+
+        timer.start();
     });
 });
