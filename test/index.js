@@ -383,4 +383,68 @@ describe('Reissue module', function() {
             return done();
         }, 500);
     });
+
+
+    it('should call callback if stop called when already inactive',
+    function(done) {
+
+        var timer = reissue.create({
+            func: function(callback) {
+                return callback();
+            },
+            interval: 100
+        });
+        timer.stop(done);
+    });
+
+
+    it('should call stop callback on completion when stop is called pre ' +
+    'function invocation', function(done) {
+
+        var out = [];
+        var i = 0;
+
+        var timer = reissue.create({
+            func: function(callback) {
+                out.push(i);
+                i += 1;
+                return callback();
+            },
+            interval: 100
+        });
+        timer.start();
+
+        setTimeout(function() {
+            timer.stop(function() {
+                assert.deepEqual(out, [0,1,2]);
+                return done();
+            });
+        }, 300);
+    });
+
+
+    it('should call stop callback on completion when stop is called mid ' +
+    'function invocation', function(done) {
+
+        var count = 0;
+
+        // attempt run this only through one cycle
+        var timer = reissue.create({
+            func: function(callback) {
+                count++;
+                return setTimeout(callback, 1000);
+            },
+            interval: 1000
+        });
+
+
+        setImmediate(function() {
+            timer.stop(function() {
+                assert.equal(count, 1);
+                return done();
+            });
+        });
+
+        timer.start();
+    });
 });
