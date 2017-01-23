@@ -341,27 +341,6 @@ describe('Reissue module', function() {
     });
 
 
-    it('should start asynchronously after explicit 0 delay', function(done) {
-
-        var async = false;
-
-        var timer = reissue.create({
-            func: function(callback) {
-
-                // if async === false, this was called synchronously
-                assert.equal(async, true);
-                return done();
-                // no need to call reissue's callback here, as that will just
-                // invoke this function again and call done() which will fail
-                // the test.
-            },
-            interval: 100
-        });
-        timer.start(0);
-        async = true;
-    });
-
-
     it('should not execute first invocation if stop was called',
     function(done) {
 
@@ -459,10 +438,12 @@ describe('Reissue module', function() {
     });
 
 
-    it('should stop and timeout should never fire', function(done) {
+    it('should emit stop, first invocation and timeout should never fire',
+    function(done) {
 
         var timer = reissue.create({
             func: function(callback) {
+                assert.fail('should not get here!');
                 return setTimeout(callback, 500);
             },
             interval: 100,
@@ -474,9 +455,7 @@ describe('Reissue module', function() {
             return callback();
         });
 
-        timer.on('stop', function() {
-            return done();
-        });
+        timer.on('stop', done);
 
         timer.start();
         timer.stop();
