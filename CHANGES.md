@@ -1,3 +1,14 @@
+# 3.0.0
+
+- BREAKING: remove 0.12 support.
+- BREAKING: move to let and const block bindings.
+- BREAKING: when calling `stop()`, reissue will cancel the next scheduled
+  invocation if it has not yet begun execution.
+- NEW: when calling `stop()`, reissue will emit a `stop` event when the current
+  invocation successfully calls back.
+- NEW: support new `timeout` option. when passed in, reissue will emit a
+  `timeout` event when any invocation exceeds the given timeout.
+
 # 2.0.1
 
 - #8: move `active` check into execution path. Ensures that calling `stop()`
