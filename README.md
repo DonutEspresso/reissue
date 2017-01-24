@@ -59,8 +59,11 @@ reissue takes the following options to its `create()` method:
 
 * `opts.func` {Function} the function to execute. This function is invoked with
 a callback function as it's last parameter.
-* `opts.interval` {Number | Function} the inteval in ms to execute the function,
-or a function that returns an interval, allowing usage of a dynamic interval.
+* `opts.interval` {Number | Function} the interval in ms to execute the
+function, or a function that returns an interval, allowing usage of a dynamic
+interval.
+* `[opts.timeout]` {Number} an optional timeout in ms. if any invocation of the
+the supplied func exceeds this timeout, the `timeout` event is fired.
 * `[opts.context]` {Context} an optional `this` context for the function. use
 this in lieu of native `bind()` if you are concerned about performance. reissue
 uses `apply()` under the hood to do context/arg binding.
@@ -98,8 +101,16 @@ If your function returns an error to the callback, this event will be emitted.
 The subscribed function will receive an error as it's only parameter.
 
 ### handler.on('stop', function() {...})
-The stop event is emitted when reissue successfully completes any ongoing
-function invocations and stops all future invocations.
+When the `stop()` method is called, this event is emitted when either the
+current invocation is successfully completed, or when the next scheduled
+invocation is successfully cancelled. If the current invocation is "stuck" in
+the sense that the callback never returns, the stop event will never fire.
+
+### handler.on('timeout', function() {...})
+If a `timeout` value is specified, this event will be fired when any given
+invocation of the function exceeds the specified value. However, if your user
+supplied function is synchronous, and never gives up the event loop, it is
+possible that this event may never get fired.
 
 
 ## Contributing
@@ -127,6 +138,6 @@ make codestyle-fix
 
 ## License
 
-Copyright (c) 2015 Alex Liu
+Copyright (c) 2017 Alex Liu
 
 Licensed under the MIT license.
