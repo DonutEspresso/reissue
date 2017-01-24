@@ -530,4 +530,36 @@ describe('Reissue module', function() {
             timer.stop();
         }, 100);
     });
+
+
+    it('GH-4: should pass elapsed time to custom interval function',
+    function(done) {
+
+        let i = 1;
+
+        const timer = reissue.create({
+            func: function(callback) {
+                setTimeout(function() {
+                    i++;
+                    return callback();
+                }, i * 100);
+                return setTimeout(callback, 250);
+            },
+            interval: function(elapsedTime) {
+                assert.isNumber(elapsedTime);
+
+                if (i === 2) {
+                    assert.isAtLeast(elapsedTime, 100);
+                } else {
+                    assert.isAtLeast(elapsedTime, 200);
+                }
+                return 100;
+            }
+        });
+
+        setTimeout(function() {
+            timer.on('stop', done);
+            timer.stop();
+        }, 200);
+    });
 });
