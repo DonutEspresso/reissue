@@ -377,10 +377,8 @@ describe('Reissue module', function() {
 
 
     it('should emit stop, cancelling next invocation', function(done) {
-
         var out = [];
         var i = 0;
-
         var timer = reissue.create({
             func: function(callback) {
                 out.push(i++);
@@ -450,15 +448,14 @@ describe('Reissue module', function() {
             timeout: 150
         });
 
-        timer.start();
-
         timer.on('timeout', function() {
             timeoutFired = true;
         });
 
-        // first invocation should fire, take too long, and timeout event
-        // should fire. it should complete before next interval, and while we're waiting for it to
-        // complete (250ms) stop is called. timeout event should not fire.
+        timer.start();
+
+        // call stop after first invocation completes but before next
+        // one is fired
         setTimeout(function() {
             timer.on('stop', function() {
                 assert.isTrue(timeoutFired);
@@ -473,6 +470,40 @@ describe('Reissue module', function() {
     it('should stop during invocation, and timeout event should not fire',
     function(done) {
 
+        var callCount = 0;
+        var timeoutFired = false;
+        var timer = reissue.create({
+            func: function(callback) {
+                callCount++;
+                return setTimeout(callback, 250);
+            },
+            interval: 200,
+            timeout: 100
+        });
+
+        timer.on('timeout', function() {
+            timeoutFired = true;
+        });
+
+        timer.start();
+
+        // first invocation should fire, and while we're waiting for it, we
+        // call stop. we should not invoke it a second time, and should not
+        // fire the timeout event.
+        setTimeout(function() {
+            timer.on('stop', function() {
+                assert.isFalse(timeoutFired);
+                assert.equal(callCount, 1);
+                return done();
+            });
+            timer.stop();
+        }, 0);
+    });
+
+
+    it('call stop during invocation, and timeout fires before invocation ' +
+    'completes', function(done) {
+
         var timer = reissue.create({
             func: function(callback) {
                 return setTimeout(callback, 250);
@@ -480,18 +511,18 @@ describe('Reissue module', function() {
             interval: 200,
             timeout: 400
         });
-        timer.start();
 
         timer.on('timeout', function(callback) {
             assert.fail('should not get here!');
             return callback();
         });
 
-        timer.on('stop', done);
+        timer.start();
 
         // first invocation should fire, and while we're waiting for it to
         // complete (250ms) stop is called. timeout event should not fire.
         setTimeout(function() {
+            timer.on('stop', done);
             timer.stop();
         }, 100);
     });
