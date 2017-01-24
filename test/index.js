@@ -3,11 +3,11 @@
 'use strict';
 
 // external modules
-var chai = require('chai');
-var assert = chai.assert;
+const chai = require('chai');
+const assert = chai.assert;
 
 // internal files
-var reissue = require('../lib');
+const reissue = require('../lib');
 
 
 describe('Reissue module', function() {
@@ -16,10 +16,10 @@ describe('Reissue module', function() {
 
     it('should emulate setInterval', function(done) {
 
-        var out = [];
-        var i = 0;
+        let i = 0;
 
-        var timer = reissue.create({
+        const out = [];
+        const timer = reissue.create({
             func: function(callback) {
                 out.push(i);
                 i += 1;
@@ -38,11 +38,11 @@ describe('Reissue module', function() {
 
     it('should accept arguments', function(done) {
 
-        var out = [];
-        var i = 0;
-        var fooStr = 'hello';
+        let i = 0;
 
-        var timer = reissue.create({
+        const out = [];
+        const fooStr = 'hello';
+        const timer = reissue.create({
             func: function(argStr, acc, callback) {
                 // assert that args were injected
                 assert.equal(argStr, fooStr);
@@ -68,16 +68,16 @@ describe('Reissue module', function() {
 
     it('should accept context and arguments', function(done) {
 
-        var out = '';
-        var i = 0;
-        var fooStr = 'random string';
-        var foo = {
+        let i = 0;
+        let out = '';
+
+        const fooStr = 'hello';
+        const foo = {
             printHi: function printHi() {
                 out += 'hi';
             }
         };
-
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(argStr, callback) {
 
                 i++;
@@ -109,9 +109,9 @@ describe('Reissue module', function() {
 
     it('should stop queue using stop()', function(done) {
 
-        var i = 0;
+        let i = 0;
 
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(callback) {
                 i++;
 
@@ -134,10 +134,10 @@ describe('Reissue module', function() {
 
     it('should use dynamic intervals', function(done) {
 
-        var startTime = Date.now();
-        var i = 0;
+        let i = 0;
 
-        var timer = reissue.create({
+        const startTime = Date.now();
+        const timer = reissue.create({
             func: function(callback) {
 
                 // each time we're called, increase i, which will
@@ -148,7 +148,7 @@ describe('Reissue module', function() {
                 // (1 *100) + (2 * 100) + (3 * 100) + (4 * 100) for a total of
                 // 100 + 200 + 300 + 400 = 1000ms
                 if (i === 5) {
-                    var elapsed = Date.now() - startTime;
+                    const elapsed = Date.now() - startTime;
                     assert.equal(elapsed >= 1000, true);
                     return done();
                 }
@@ -164,10 +164,10 @@ describe('Reissue module', function() {
 
     it('should handle decreasing intervals', function(done) {
 
-        var startTime = Date.now();
-        var i = 5;
+        let i = 5;
 
-        var timer = reissue.create({
+        const startTime = Date.now();
+        const timer = reissue.create({
             func: function(callback) {
 
                 // each time we're called, decrease the interval
@@ -177,7 +177,7 @@ describe('Reissue module', function() {
                 // (1 *100) + (2 * 100) + (3 * 100) + (4 * 100) for a total of
                 // 100 + 200 + 300 + 400 = 1000ms
                 if (i === 0) {
-                    var elapsed = Date.now() - startTime;
+                    const elapsed = Date.now() - startTime;
                     assert.equal(elapsed >= 1000, true);
                     return done();
                 }
@@ -193,10 +193,10 @@ describe('Reissue module', function() {
 
     it('should emit error', function(done) {
 
-        var i = 0;
-        var errFired = false;
+        let i = 0;
+        let errFired = false;
 
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(callback) {
 
                 i++;
@@ -228,17 +228,17 @@ describe('Reissue module', function() {
 
     it('should emit error with context and args', function(done) {
 
-        var out = '';
-        var i = 0;
-        var fooStr = 'random string';
-        var foo = {
+        let i = 0;
+        let errFired = false;
+        let out = '';
+
+        const fooStr = 'random string';
+        const foo = {
             printHi: function printHi() {
                 out += 'hi';
             }
         };
-        var errFired = false;
-
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(argStr, callback) {
 
                 i++;
@@ -284,10 +284,10 @@ describe('Reissue module', function() {
 
     it('should throw when start() called multiple times', function(done) {
 
-        var out = [];
-        var i = 0;
+        let i = 0;
 
-        var timer = reissue.create({
+        const out = [];
+        const timer = reissue.create({
             func: function(callback) {
                 out.push(i);
                 i += 1;
@@ -313,11 +313,11 @@ describe('Reissue module', function() {
 
     it('should start after arbitrary delay', function(done) {
 
-        var startTime = Date.now();
-        var out = [];
-        var i = 0;
+        const startTime = Date.now();
+        const out = [];
+        let i = 0;
 
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(callback) {
 
                 out.push(i);
@@ -344,9 +344,9 @@ describe('Reissue module', function() {
     it('should not execute first invocation if stop was called',
     function(done) {
 
-        var fired = false;
+        let fired = false;
 
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(callback) {
                 fired = true;
                 return callback();
@@ -365,7 +365,7 @@ describe('Reissue module', function() {
 
 
     it('should emit stop event if reissue is inactive', function(done) {
-        var timer = reissue.create({
+        const timer = reissue.create({
              func: function(callback) {
                  return callback();
              },
@@ -377,9 +377,11 @@ describe('Reissue module', function() {
 
 
     it('should emit stop, cancelling next invocation', function(done) {
-        var out = [];
-        var i = 0;
-        var timer = reissue.create({
+
+        let i = 0;
+
+        const out = [];
+        const timer = reissue.create({
             func: function(callback) {
                 out.push(i++);
                 return setTimeout(callback, 400);
@@ -403,10 +405,10 @@ describe('Reissue module', function() {
 
     it('should emit stop, never schedules next invocation', function(done) {
 
-        var out = [];
-        var i = 0;
+        let i = 0;
 
-        var timer = reissue.create({
+        const out = [];
+        const timer = reissue.create({
             func: function(callback) {
                 out.push(i++);
 
@@ -437,9 +439,10 @@ describe('Reissue module', function() {
 
     it('should emit timeout event', function(done) {
 
-        var callCount = 0;
-        var timeoutFired = false;
-        var timer = reissue.create({
+        let callCount = 0;
+        let timeoutFired = false;
+
+        const timer = reissue.create({
             func: function(callback) {
                 callCount++;
                 return setTimeout(callback, 300);
@@ -470,9 +473,10 @@ describe('Reissue module', function() {
     it('should stop during invocation, and timeout event should not fire',
     function(done) {
 
-        var callCount = 0;
-        var timeoutFired = false;
-        var timer = reissue.create({
+        let callCount = 0;
+        let timeoutFired = false;
+
+        const timer = reissue.create({
             func: function(callback) {
                 callCount++;
                 return setTimeout(callback, 250);
@@ -504,7 +508,7 @@ describe('Reissue module', function() {
     it('call stop during invocation, and timeout fires before invocation ' +
     'completes', function(done) {
 
-        var timer = reissue.create({
+        const timer = reissue.create({
             func: function(callback) {
                 return setTimeout(callback, 250);
             },
