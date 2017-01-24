@@ -101,14 +101,16 @@ If your function returns an error to the callback, this event will be emitted.
 The subscribed function will receive an error as it's only parameter.
 
 ### handler.on('stop', function() {...})
-When the `stop()` method is called, this event is emitted when when either the
+When the `stop()` method is called, this event is emitted when either the
 current invocation is successfully completed, or when the next scheduled
 invocation is successfully cancelled. If the current invocation is "stuck" in
 the sense that the callback never returns, the stop event will never fire.
 
 ### handler.on('timeout', function() {...})
 If a `timeout` value is specified, this event will be fired when any given
-invocation of the function exceeds the specified value.
+invocation of the function exceeds the specified value. However, if your user
+supplied function is synchronous, and never gives up the event loop, it is
+possible that this event may never get fired.
 
 
 ## Contributing
