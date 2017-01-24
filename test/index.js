@@ -382,7 +382,7 @@ describe('Reissue module', function() {
         var timer = reissue.create({
             func: function(callback) {
                 out.push(i++);
-                return callback();
+                return setTimeout(callback, 400);
             },
             interval: 500
         });
@@ -397,7 +397,7 @@ describe('Reissue module', function() {
         // this should allow two invocations, then cancel the third.
         setTimeout(function() {
             timer.stop();
-        }, 1000);
+        }, 900);
     });
 
 
