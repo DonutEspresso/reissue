@@ -341,8 +341,8 @@ describe('Reissue module', function() {
     });
 
 
-    it('should not execute first invocation if stop was called',
-    function(done) {
+    it('should not execute first invocation if started with delay and stop ' +
+    'was called', function(done) {
 
         let fired = false;
 
@@ -359,6 +359,30 @@ describe('Reissue module', function() {
         // because we called stop, reissue should never fire
         setTimeout(function() {
             assert.isFalse(fired);
+            return done();
+        }, 500);
+    });
+
+
+    it('should execute first invocation synchronously if start had no delay ' +
+    'and stop was called', function(done) {
+
+        let fired = false;
+
+        const timer = reissue.create({
+            func: function(callback) {
+                fired = true;
+                return callback();
+            },
+            interval: 300
+        });
+        timer.start();
+        timer.stop();
+
+        // because we called start synchronously, we'll have at least one
+        // invocation (first one).
+        setTimeout(function() {
+            assert.isTrue(fired);
             return done();
         }, 500);
     });
