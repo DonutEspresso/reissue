@@ -421,11 +421,6 @@ describe('Reissue module', function() {
             interval: 500
         });
 
-        timer.on('stop', function() {
-            assert.deepEqual(out, [0,1]);
-            return done();
-        });
-
         timer.start();
 
         // this should allow two invocations, calling stop while user supplied
@@ -433,22 +428,59 @@ describe('Reissue module', function() {
         // completes, stop should get emitted and the third invocation is never
         // scheduled.
         setTimeout(function() {
+            timer.on('stop', function() {
+                assert.deepEqual(out, [0,1]);
+                return done();
+            });
             timer.stop();
         }, 1000);
     });
 
 
-    it('should emit stop, first invocation and timeout should never fire',
+    it('should emit timeout event', function(done) {
+
+        var callCount = 0;
+        var timeoutFired = false;
+        var timer = reissue.create({
+            func: function(callback) {
+                callCount++;
+                return setTimeout(callback, 300);
+            },
+            interval: 1000,
+            timeout: 150
+        });
+
+        timer.start();
+
+        timer.on('timeout', function() {
+            timeoutFired = true;
+        });
+
+        // first invocation should fire, take too long, and timeout event
+        // should fire. it should complete before next interval, and while we're waiting for it to
+        // complete (250ms) stop is called. timeout event should not fire.
+        setTimeout(function() {
+            timer.on('stop', function() {
+                assert.isTrue(timeoutFired);
+                assert.equal(callCount, 1);
+                return done();
+            });
+            timer.stop();
+        }, 400);
+    });
+
+
+    it('should stop during invocation, and timeout event should not fire',
     function(done) {
 
         var timer = reissue.create({
             func: function(callback) {
-                assert.fail('should not get here!');
-                return setTimeout(callback, 500);
+                return setTimeout(callback, 250);
             },
-            interval: 100,
-            timeout: 200
+            interval: 200,
+            timeout: 400
         });
+        timer.start();
 
         timer.on('timeout', function(callback) {
             assert.fail('should not get here!');
@@ -457,44 +489,10 @@ describe('Reissue module', function() {
 
         timer.on('stop', done);
 
-        timer.start();
-        timer.stop();
-    });
-
-
-    it('should cancel next invocation via timeout callback', function(done) {
-
-        var timer = reissue.create({
-            func: function(callback) {
-                return setTimeout(callback, 500);
-            },
-            interval: 100,
-            timeout: 200
-        });
-
-        var start = Date.now();
-
-        timer.once('timeout', function(callback) {
-            timer.once('timeout', function(cb) {
-                // since we've thrown the first one away, and invoked it again
-                // immediately, we should be somewhere between 400-500ms
-                // elapsed
-                var elapsed = Date.now() - start;
-                assert.isAtLeast(elapsed, 400);
-                assert.isAtMost(elapsed, 500);
-                timer.stop();
-                return cb();
-            });
-
-            // true cancels the timed out invocation and schedules one
-            // immediately
-            return callback(true);
-        });
-
-        timer.on('stop', function() {
-            return done();
-        });
-
-        timer.start();
+        // first invocation should fire, and while we're waiting for it to
+        // complete (250ms) stop is called. timeout event should not fire.
+        setTimeout(function() {
+            timer.stop();
+        }, 100);
     });
 });
