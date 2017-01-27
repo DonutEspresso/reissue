@@ -390,11 +390,11 @@ describe('Reissue module', function() {
 
     it('should emit stop event if reissue is inactive', function(done) {
         const timer = reissue.create({
-             func: function(callback) {
-                 return callback();
-             },
-             interval: 100
-         });
+            func: function(callback) {
+                return callback();
+            },
+            interval: 100
+        });
         timer.on('stop', done);
         timer.stop();
     });
