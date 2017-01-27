@@ -2,8 +2,7 @@
     // setup
     "fileExtensions":  [ ".js" ],
     "excludeFiles":    [
-        "./node_modules/**",
-        "./app/templates/**"
+        "./node_modules/**"
      ],
 
     // general rules
