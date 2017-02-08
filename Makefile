@@ -26,7 +26,6 @@ NSP_BADGE	:= $(TOOLS)/nspBadge.js
 #
 # Files
 #
-GITHOOKS	:= $(shell find $(GITHOOKS_SRC) -type f -exec basename {} \;)
 LIB_FILES	:= $(ROOT)/lib
 TEST_FILES	:= $(ROOT)/test
 COVERAGE_FILES	:= $(ROOT)/coverage
