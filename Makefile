@@ -26,8 +26,7 @@ NSP_BADGE	:= $(TOOLS)/nspBadge.js
 #
 # Files
 #
-GIT_HOOK_SRC	:= $(GITHOOKS_SRC)/pre-push
-GIT_HOOK_DEST	:= $(GITHOOKS_DEST)/pre-push
+GITHOOKS	:= $(shell find $(GITHOOKS_SRC) -type f -exec basename {} \;)
 LIB_FILES	:= $(ROOT)/lib
 TEST_FILES	:= $(ROOT)/test
 COVERAGE_FILES	:= $(ROOT)/coverage
@@ -47,12 +46,10 @@ node_modules: package.json
 	$(NPM) install
 	@touch $(NODE_MODULES)
 
-$(GIT_HOOK_DEST):
-	@ln -s $(GIT_HOOK_SRC) $(GIT_HOOK_DEST)
-
 
 .PHONY: githooks
-githooks: $(GIT_HOOK_DEST)
+githooks:
+	@for hook in $(GITHOOKS_SRC)/*; do ln -sf $${hook} $(GITHOOKS_DEST)/$${hook##*/}; done
 
 
 .PHONY: lint
