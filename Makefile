@@ -3,114 +3,115 @@
 #
 ROOT_SLASH	:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 ROOT		:= $(patsubst %/,%,$(ROOT_SLASH))
-NODE_MODULES	:= $(ROOT)/node_modules
-NODE_BIN	:= $(NODE_MODULES)/.bin
+TEST		:= $(ROOT)/test
 TOOLS		:= $(ROOT)/tools
 GITHOOKS_SRC	:= $(TOOLS)/githooks
 GITHOOKS_DEST	:= $(ROOT)/.git/hooks
 
 
 #
+# Generated Files & Directories
+#
+NODE_MODULES	:= $(ROOT)/node_modules
+NODE_BIN	:= $(NODE_MODULES)/.bin
+COVERAGE	:= $(ROOT)/.nyc_output
+COVERAGE_RES	:= $(ROOT)/coverage
+YARN_LOCK	:= $(ROOT)/yarn.lock
+PACKAGE_LOCK	:= $(ROOT)/package-lock.json
+
+
+#
 # Tools and binaries
 #
 NPM		:= npm
+YARN		:= yarn
 ESLINT		:= $(NODE_BIN)/eslint
-JSCS		:= $(NODE_BIN)/jscs
 MOCHA		:= $(NODE_BIN)/mocha
-_MOCHA		:= $(NODE_BIN)/_mocha
-ISTANBUL	:= $(NODE_BIN)/istanbul
+NYC		:= $(NODE_BIN)/nyc
 COVERALLS	:= $(NODE_BIN)/coveralls
-NSP		:= $(NODE_BIN)/nsp
-NSP_BADGE	:= $(TOOLS)/nspBadge.js
+CHANGELOG	:= $(TOOLS)/changelog.js
 
 
 #
-# Files
+# Files and globs
 #
 PACKAGE_JSON	:= $(ROOT)/package.json
-LIB_FILES	:= $(ROOT)/lib
-TEST_FILES	:= $(ROOT)/test
-COVERAGE_FILES	:= $(ROOT)/coverage
-LCOV		:= $(ROOT)/coverage/lcov.info
-SHRINKWRAP	:= $(ROOT)/npm-shrinkwrap.json
 GITHOOKS	:= $(wildcard $(GITHOOKS_SRC)/*)
-SRCS		:= $(shell find $(LIB_FILES) $(TEST_FILES) -name '*.js' -type f)
-
+LCOV		:= $(COVERAGE)/lcov.info
+ALL_FILES	:= $(shell find $(ROOT) \
+			-not \( -path $(NODE_MODULES) -prune \) \
+			-not \( -path $(COVERAGE) -prune \) \
+			-not \( -path $(COVERAGE_RES) -prune \) \
+			-name '*.js' -type f)
+TEST_FILES	:= $(shell find $(TEST) -name '*.js' -type f)
 
 #
 # Targets
 #
 
 $(NODE_MODULES): $(PACKAGE_JSON) ## Install node_modules
-	$(NPM) install
+	@$(YARN)
 	@touch $(NODE_MODULES)
 
 
-.PHONY: all
-all: clean node_modules lint codestyle test
+.PHONY: help
+help:
+	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) \
+		| sort | awk 'BEGIN {FS = ":.*?## "}; \
+		{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 
 .PHONY: githooks
-githooks: $(GITHOOKS)## Symlink githooks
+githooks: $(GITHOOKS) ## Symlink githooks
 	@$(foreach hook,\
 		$(GITHOOKS),\
 		ln -sf $(hook) $(GITHOOKS_DEST)/$(hook##*/);\
 	)
 
 
+.PHONY: changelog
+changelog: $(NODE_MODULES) $(CHANGELOG) ## Run changelog
+	@$(CHANGELOG) generate
+
+
+.PHONY: release
+release: $(NODE_MODULES) $(CHANGELOG) ## Create a release
+	@$(CHANGELOG) release
+
+
 .PHONY: lint
-lint: $(NODE_MODULES) $(ESLINT) $(SRCS)
-	@$(ESLINT) $(SRCS)
+lint: $(NODE_MODULES) $(ESLINT) $(ALL_FILES) ## Run lint checker (eslint).
+	@$(ESLINT) $(ALL_FILES)
 
 
-.PHONY: nsp
-nsp: $(NODE_MODULES) $(NSP)
-ifeq ($(wildcard $(SHRINKWRAP)),)
-	@$(NPM) shrinkwrap --dev
-	@($(NSP) check) | $(NSP_BADGE)
-	@rm $(SHRINKWRAP)
-else
-	@($(NSP) check) | $(NSP_BADGE)
-endif
-
-
-.PHONY: codestyle
-codestyle: $(NODE_MODULES) $(JSCS) $(SRCS)
-	@$(JSCS) $(SRCS)
-
-
-.PHONY: codestyle-fix
-codestyle-fix: $(NODE_MODULES) $(JSCS) $(SRCS)
-	@$(JSCS) $(SRCS) --fix
+.PHONY: security
+security: $(NODE_MODULES) ## Check for dependency vulnerabilities.
+	@$(NPM) install --package-lock-only
+	@$(NPM) audit
 
 
 .PHONY: prepush
-prepush: $(NODE_MODULES) lint codestyle test nsp
+prepush: $(NODE_MODULES) lint coverage security ## Git pre-push hook task. Run before committing and pushing.
 
 
 .PHONY: test
-test: $(NODE_MODULES) $(MOCHA) $(SRCS)
-	@$(MOCHA) -R spec --full-trace
+test: $(NODE_MODULES) $(MOCHA) ## Run unit tests.
+	@$(MOCHA) -R spec --full-trace --no-exit --no-timeouts $(TEST_FILES)
 
 
 .PHONY: coverage
-coverage: $(NODE_MODULES) $(ISTANBUL) $(SRCS)
-	@$(ISTANBUL) cover $(_MOCHA) --report lcovonly -- -R spec
+coverage: $(NODE_MODULES) $(NYC) ## Run unit tests with coverage reporting. Generates reports into /coverage.
+	@$(NYC) --reporter=html --reporter=text make test
 
 
-.PHONY: report-coverage
-report-coverage: coverage
-	@cat $(LCOV) | $(COVERALLS)
-
-
-.PHONY: clean-coverage
-clean-coverage:
-	@rm -rf $(COVERAGE_FILES)
+.PHONY: report-coverage ## Report unit test coverage to coveralls
+report-coverage: $(NODE_MODULES) $(NYC) ## Run unit tests with coverage reporting. Generates reports into /coverage.
+	@$(NYC) report --reporter=text-lcov make test | $(COVERALLS)
 
 
 .PHONY: clean
-clean: clean-coverage
-	@rm -rf $(NODE_MODULES)
+clean: ## Cleans unit test coverage files and node_modules.
+	@rm -rf $(NODE_MODULES) $(COVERAGE) $(COVERAGE_RES) $(YARN_LOCK) $(PACKAGE_LOCK)
 
 
 #
