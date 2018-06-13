@@ -5,8 +5,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/DonutEspresso/reissue/badge.svg?branch=master)](https://coveralls.io/github/DonutEspresso/reissue?branch=master)
 [![Dependency Status](https://david-dm.org/DonutEspresso/reissue.svg)](https://david-dm.org/DonutEspresso/reissue)
 [![devDependency Status](https://david-dm.org/DonutEspresso/reissue/dev-status.svg)](https://david-dm.org/DonutEspresso/reissue#info=devDependencies)
-[![bitHound Score](https://www.bithound.io/github/DonutEspresso/reissue/badges/score.svg)](https://www.bithound.io/github/DonutEspresso/reissue/master)
-[![NSP Status](https://img.shields.io/badge/NSP%20status-no%20vulnerabilities-green.svg)](https://travis-ci.org/DonutEspresso/reissue)
 
 > setInterval with setTimeout semantics
 
@@ -130,14 +128,9 @@ Before committing, run the prepush hook:
 make prepush
 ```
 
-If you have style errors, you can auto fix whitespace issues by running:
-
-```sh
-make codestyle-fix
-```
 
 ## License
 
-Copyright (c) 2017 Alex Liu
+Copyright (c) 2018 Alex Liu
 
 Licensed under the MIT license.
