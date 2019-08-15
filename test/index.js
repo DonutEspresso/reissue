@@ -9,13 +9,10 @@ const assert = chai.assert;
 // internal files
 const reissue = require('../lib');
 
-
 describe('Reissue module', function() {
-
     this.timeout(100000);
 
     it('should emulate setInterval', function(done) {
-
         let i = 0;
 
         const out = [];
@@ -25,7 +22,7 @@ describe('Reissue module', function() {
                 i += 1;
                 // if we reached 5, stop the test
                 if (i === 5) {
-                    assert.deepEqual(out, [0,1,2,3,4]);
+                    assert.deepEqual(out, [0, 1, 2, 3, 4]);
                     return done();
                 }
                 return callback();
@@ -35,9 +32,7 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should accept arguments', function(done) {
-
         let i = 0;
 
         const out = [];
@@ -54,7 +49,7 @@ describe('Reissue module', function() {
 
                 // if we reached 5, stop the test
                 if (i === 5) {
-                    assert.deepEqual(acc, [0,1,2,3,4]);
+                    assert.deepEqual(acc, [0, 1, 2, 3, 4]);
                     return done();
                 }
                 return callback();
@@ -65,9 +60,7 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should accept context and arguments', function(done) {
-
         let i = 0;
         let out = '';
 
@@ -79,7 +72,6 @@ describe('Reissue module', function() {
         };
         const timer = reissue.create({
             func: function(argStr, callback) {
-
                 i++;
 
                 // assert that args were injected
@@ -106,9 +98,7 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should stop queue using stop()', function(done) {
-
         let i = 0;
 
         const timer = reissue.create({
@@ -131,15 +121,12 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should use dynamic intervals', function(done) {
-
         let i = 0;
 
         const startTime = Date.now();
         const timer = reissue.create({
             func: function(callback) {
-
                 // each time we're called, increase i, which will
                 // increase the interval.
                 i++;
@@ -161,15 +148,12 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should handle decreasing intervals', function(done) {
-
         let i = 5;
 
         const startTime = Date.now();
         const timer = reissue.create({
             func: function(callback) {
-
                 // each time we're called, decrease the interval
                 i--;
 
@@ -190,15 +174,12 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should emit error', function(done) {
-
         let i = 0;
         let errFired = false;
 
         const timer = reissue.create({
             func: function(callback) {
-
                 i++;
 
                 if (i === 2) {
@@ -225,9 +206,7 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should emit error with context and args', function(done) {
-
         let i = 0;
         let errFired = false;
         let out = '';
@@ -240,7 +219,6 @@ describe('Reissue module', function() {
         };
         const timer = reissue.create({
             func: function(argStr, callback) {
-
                 i++;
 
                 // assert that args were injected
@@ -281,9 +259,7 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should throw when start() called multiple times', function(done) {
-
         let i = 0;
 
         const out = [];
@@ -299,7 +275,7 @@ describe('Reissue module', function() {
                 }
 
                 if (i === 5) {
-                    assert.deepEqual(out, [0,1,2,3,4]);
+                    assert.deepEqual(out, [0, 1, 2, 3, 4]);
                     return done();
                 }
 
@@ -310,27 +286,24 @@ describe('Reissue module', function() {
         timer.start();
     });
 
-
     it('should start after arbitrary delay', function(done) {
-
         const startTime = Date.now();
         const out = [];
         let i = 0;
 
         const timer = reissue.create({
             func: function(callback) {
-
                 out.push(i);
                 i += 1;
 
                 // ensure elapsed time for first invocation is at least 150ms
                 // due to delay.
                 if (i === 1) {
-                    assert.equal((Date.now() - startTime) >= 150, true);
+                    assert.equal(Date.now() - startTime >= 150, true);
                 }
                 // if we reached 5, stop the test
                 if (i === 5) {
-                    assert.deepEqual(out, [0,1,2,3,4]);
+                    assert.deepEqual(out, [0, 1, 2, 3, 4]);
                     return done();
                 }
                 return callback();
@@ -340,53 +313,54 @@ describe('Reissue module', function() {
         timer.start(150);
     });
 
+    it(
+        'should not execute first invocation if started with delay and stop ' +
+            'was called',
+        function(done) {
+            let fired = false;
 
-    it('should not execute first invocation if started with delay and stop ' +
-    'was called', function(done) {
+            const timer = reissue.create({
+                func: function(callback) {
+                    fired = true;
+                    return callback();
+                },
+                interval: 300
+            });
+            timer.start(300);
+            timer.stop();
 
-        let fired = false;
+            // because we called stop, reissue should never fire
+            setTimeout(function() {
+                assert.isFalse(fired);
+                return done();
+            }, 500);
+        }
+    );
 
-        const timer = reissue.create({
-            func: function(callback) {
-                fired = true;
-                return callback();
-            },
-            interval: 300
-        });
-        timer.start(300);
-        timer.stop();
+    it(
+        'should execute first invocation synchronously if start had no delay ' +
+            'and stop was called',
+        function(done) {
+            let fired = false;
 
-        // because we called stop, reissue should never fire
-        setTimeout(function() {
-            assert.isFalse(fired);
-            return done();
-        }, 500);
-    });
+            const timer = reissue.create({
+                func: function(callback) {
+                    fired = true;
+                    return callback();
+                },
+                interval: 300
+            });
+            timer.start();
+            timer.stop();
 
-
-    it('should execute first invocation synchronously if start had no delay ' +
-    'and stop was called', function(done) {
-
-        let fired = false;
-
-        const timer = reissue.create({
-            func: function(callback) {
-                fired = true;
-                return callback();
-            },
-            interval: 300
-        });
-        timer.start();
-        timer.stop();
-
-        // because we called start synchronously, we'll have at least one
-        // invocation (first one).
-        setTimeout(function() {
-            assert.isTrue(fired);
-            return done();
-        }, 500);
-    });
-
+            // because we called start synchronously, we'll have at least one
+            // invocation (first one).
+            setTimeout(function() {
+                assert.isTrue(fired);
+                return done();
+            }, 500);
+        }
+    );
 
     it('should emit stop event if reissue is inactive', function(done) {
         const timer = reissue.create({
@@ -399,9 +373,7 @@ describe('Reissue module', function() {
         timer.stop();
     });
 
-
     it('should emit stop, cancelling next invocation', function(done) {
-
         let i = 0;
 
         const out = [];
@@ -414,7 +386,7 @@ describe('Reissue module', function() {
         });
 
         timer.on('stop', function() {
-            assert.deepEqual(out, [0,1]);
+            assert.deepEqual(out, [0, 1]);
             return done();
         });
 
@@ -426,9 +398,7 @@ describe('Reissue module', function() {
         }, 900);
     });
 
-
     it('should emit stop, never schedules next invocation', function(done) {
-
         let i = 0;
 
         const out = [];
@@ -453,16 +423,14 @@ describe('Reissue module', function() {
         // scheduled.
         setTimeout(function() {
             timer.on('stop', function() {
-                assert.deepEqual(out, [0,1]);
+                assert.deepEqual(out, [0, 1]);
                 return done();
             });
             timer.stop();
         }, 1000);
     });
 
-
     it('should emit timeout event', function(done) {
-
         let callCount = 0;
         let timeoutFired = false;
 
@@ -493,10 +461,7 @@ describe('Reissue module', function() {
         }, 400);
     });
 
-
-    it('should stop during invocation, and timeout event should not fire',
-    function(done) {
-
+    it('should stop during invocation, and timeout event should not fire', function(done) {
         let callCount = 0;
         let timeoutFired = false;
 
@@ -528,37 +493,35 @@ describe('Reissue module', function() {
         }, 0);
     });
 
+    it(
+        'call stop during invocation, and timeout fires before invocation ' +
+            'completes',
+        function(done) {
+            const timer = reissue.create({
+                func: function(callback) {
+                    return setTimeout(callback, 250);
+                },
+                interval: 200,
+                timeout: 400
+            });
 
-    it('call stop during invocation, and timeout fires before invocation ' +
-    'completes', function(done) {
+            timer.on('timeout', function(callback) {
+                assert.fail('should not get here!');
+                return callback();
+            });
 
-        const timer = reissue.create({
-            func: function(callback) {
-                return setTimeout(callback, 250);
-            },
-            interval: 200,
-            timeout: 400
-        });
+            timer.start();
 
-        timer.on('timeout', function(callback) {
-            assert.fail('should not get here!');
-            return callback();
-        });
+            // first invocation should fire, and while we're waiting for it to
+            // complete (250ms) stop is called. timeout event should not fire.
+            setTimeout(function() {
+                timer.on('stop', done);
+                timer.stop();
+            }, 100);
+        }
+    );
 
-        timer.start();
-
-        // first invocation should fire, and while we're waiting for it to
-        // complete (250ms) stop is called. timeout event should not fire.
-        setTimeout(function() {
-            timer.on('stop', done);
-            timer.stop();
-        }, 100);
-    });
-
-
-    it('GH-4: should pass elapsed time to custom interval function',
-    function(done) {
-
+    it('GH-4: should pass elapsed time to custom interval function', function(done) {
         let i = 1;
 
         const timer = reissue.create({
