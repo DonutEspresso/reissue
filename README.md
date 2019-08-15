@@ -110,6 +110,8 @@ invocation of the function exceeds the specified value. However, if your user
 supplied function is synchronous, and never gives up the event loop, it is
 possible that this event may never get fired.
 
+See [API](/api.md)
+
 
 ## Contributing
 
