@@ -43,7 +43,7 @@ var handler = reissue.create({
 handler.start();
 ```
 
-Calling `start()`  on the handler will begin the interval, and now reissue will
+Calling `start()` on the handler will begin the interval, and now reissue will
 log 'hi' to the console once every second. Note the callback parameter passed
 to the function - this callback _must_ be called in order for the next
 invocation to proceed.
@@ -60,6 +60,8 @@ a callback function as it's last parameter.
 * `opts.interval` {Number | Function} the interval in ms to execute the
 function, or a function that returns an interval, allowing usage of a dynamic
 interval.
+* `[opts.unref]` {Boolean} if true, will unref the timers allowing the process
+to exit gracefully without having to call stop on the handler.
 * `[opts.timeout]` {Number} an optional timeout in ms. if any invocation of the
 the supplied func exceeds this timeout, the `timeout` event is fired.
 * `[opts.context]` {Context} an optional `this` context for the function. use
