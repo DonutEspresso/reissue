@@ -521,6 +521,55 @@ describe('Reissue module', function() {
         }
     );
 
+    it('should unref timer', function(done) {
+        // mocha is set not to exit automatically - so this test should hang
+        // the test runner if the functionality isn't working as expected.
+        const timer = reissue.create({
+            interval: 100,
+            unref: true,
+            func: function(callback) {
+                return callback();
+            }
+        });
+
+        timer.start();
+
+        return done();
+    });
+
+    it('should unref timer when it times out', function(done) {
+        // mocha is set not to exit automatically - so this test should hang
+        // the test runner if the functionality isn't working as expected.
+        const timer = reissue.create({
+            interval: 500,
+            unref: true,
+            timeout: 100,
+            func: function(callback) {
+                setTimeout(callback, 200);
+            }
+        });
+
+        timer.start();
+
+        return done();
+    });
+
+    it('should unref timer when calling start with delay', function(done) {
+        // mocha is set not to exit automatically - so this test should hang
+        // the test runner if the functionality isn't working as expected.
+        const timer = reissue.create({
+            interval: 500,
+            unref: true,
+            func: function(callback) {
+                return callback();
+            }
+        });
+
+        timer.start(10);
+
+        return done();
+    });
+
     it('GH-4: should pass elapsed time to custom interval function', function(done) {
         let i = 1;
 
